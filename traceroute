@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+# Traceroute clone
+# Works on IP only
+# ./traceroute 150.150.150.150
+
+import socket
+import sys
+from struct import pack, unpack
+
+ICMP_CODE = socket.getprotobyname('icmp')
+
+# Check user input
+if len(sys.argv) > 1:
+    address = sys.argv[1]
+else:
+    sys.exit("Please pass in an IP address!")
+
+message_format = "BBHHHHH"
+message_data = [8, 0, 0, 63474, 62199, 1, 256]
+message = pack(message_format, *message_data)
+
+with socket.socket(socket.AF_INET, socket.SOCK_RAW, ICMP_CODE) as s:
+    print("Sending ping to {}".format(address))
+    s.sendto(message, (address, 1))
+    data, server = s.recvfrom(1000)
+    print(data)
